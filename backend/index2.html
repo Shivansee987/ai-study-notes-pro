@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Text Summarizer</title>
+  <style>
+    body {
+      font-family: Arial;
+      margin: 40px;
+    }
+    textarea {
+      width: 100%;
+      height: 200px;
+      margin-top: 20px;
+    }
+    input, button {
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+
+  <h2>Text Summarization App</h2>
+  <input type="file" id="fileInput" accept=".txt"><br>
+  <button onclick="summarize()">Summarize</button>
+
+  <h3>Summary:</h3>
+  <textarea id="summaryBox" readonly></textarea>
+
+  <script>
+    function summarize() {
+      const fileInput = document.getElementById('fileInput');
+      const summaryBox = document.getElementById('summaryBox');
+
+      if (!fileInput.files.length) {
+        alert('Please upload a .txt file first.');
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append('file', fileInput.files[0]);
+
+      fetch('http://127.0.0.1:5000/summarize', {
+        method: 'POST',
+        body: formData
+      })
+      .then(response => response.json())
+      .then(data => {
+        summaryBox.value = data.summary;
+      })
+      .catch(error => {
+        alert('Error: ' + error);
+      });
+    }
+  </script>
+
+</body>
+</html>
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Text Summarizer</title>
+</head>
+<body>
+    <h1>Upload a Text File to Summarize</h1>
+    <form id="upload-form">
+        <input type="file" id="file" name="file" accept=".txt" required>
+        <button type="submit">Summarize</button>
+    </form>
+    <h2>Summary:</h2>
+    <p id="summary-text"></p>
+
+    <script>
+        document.getElementById("upload-form").addEventListener("submit", async function (e) {
+            e.preventDefault();
+
+            const fileInput = document.getElementById("file");
+            const formData = new FormData();
+            formData.append("file", fileInput.files[0]);
+
+            try {
+                const response = await fetch("http://127.0.0.1:5000/summarize", {
+                    method: "POST",
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                if (data.summary) {
+                    document.getElementById("summary-text").innerText = data.summary;
+                } else {
+                    document.getElementById("summary-text").innerText = "No summary returned.";
+                }
+            } catch (error) {
+                console.error("Error:", error);
+                document.getElementById("summary-text").innerText = "Something went wrong.";
+            }
+        });
+    </script>
+</body>
+</html>
+
